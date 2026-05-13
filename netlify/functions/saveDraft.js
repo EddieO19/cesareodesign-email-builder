@@ -25,15 +25,27 @@ exports.handler = async function(event) {
       }
     );
 
-    const result = await response.json();
+   const result = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        airtable: result
-      })
-    };
+console.log("AIRTABLE RESPONSE:", result);
+
+if (!response.ok) {
+  return {
+    statusCode: response.status,
+    body: JSON.stringify({
+      success: false,
+      airtableError: result
+    })
+  };
+}
+
+return {
+  statusCode: 200,
+  body: JSON.stringify({
+    success: true,
+    airtable: result
+  })
+};
 
   } catch (error) {
 
