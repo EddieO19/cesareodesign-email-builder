@@ -284,26 +284,31 @@ async function getVersions() {
       return [];
     }
 
-    return data.records.map(r => ({
-      id: r.id,
-      name: r.fields.version_name || 'Untitled',
-      date: r.fields.created_at || '',
+  return data.records.map(r => {
 
-      data: {
-        name: r.fields.client_name || '',
-        project: r.fields.project_name || '',
-        week: r.fields.week_of || '',
-        issue: r.fields.issue_no || '',
-        completion: r.fields.completion_date || '',
-        notes: r.fields.notes || '',
-        inspo: r.fields.inspiration || '',
+  const savedData = JSON.parse(r.fields.Data || '{}');
 
-        wins: JSON.parse(r.fields.wins_json || '[]'),
-        actions: JSON.parse(r.fields.actions_json || '[]'),
-        phases: JSON.parse(r.fields.phases_json || '[]'),
-        payments: JSON.parse(r.fields.payments_json || '[]')
-      }
-    }));
+  return {
+    id: r.id,
+    name: r.fields.Name || 'Untitled',
+    date: r.fields.Date || '',
+
+    data: {
+      name: savedData.client_name || '',
+      project: savedData.project_name || '',
+      week: savedData.week_of || '',
+      issue: savedData.issue_no || '',
+      completion: savedData.completion_date || '',
+      notes: savedData.notes || '',
+      inspo: savedData.inspiration || '',
+
+      wins: JSON.parse(savedData.wins_json || '[]'),
+      actions: JSON.parse(savedData.actions_json || '[]'),
+      phases: JSON.parse(savedData.phases_json || '[]'),
+      payments: JSON.parse(savedData.payments_json || '[]')
+    }
+  };
+});
 
   } catch (e) {
     console.error(e);
