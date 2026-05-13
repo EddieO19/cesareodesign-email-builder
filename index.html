@@ -638,16 +638,23 @@ async function saveVersion() {
 
   try {
 
-    await fetch(AIRTABLE_URL, {
-      method: 'POST',
+ const response = await fetch('/.netlify/functions/saveDraft', {
+  method: 'POST',
 
-      headers: {
-        Authorization: `Bearer ${AIRTABLE_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
+  headers: {
+    'Content-Type': 'application/json'
+  },
 
-      body: JSON.stringify(payload)
-    });
+  body: JSON.stringify(payload.fields)
+});
+
+const result = await response.json();
+
+if (!response.ok) {
+  console.error(result);
+  showToast('Save failed');
+  return;
+}
 
     closeSaveModal();
 
