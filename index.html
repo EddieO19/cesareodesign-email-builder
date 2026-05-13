@@ -271,22 +271,18 @@ var payments=[
 ];
 var generatedHTML='';
 var activeVersionId=null;
-const AIRTABLE_TOKEN = 'patDJQQxBou1B4Ks2';
-const AIRTABLE_BASE_ID = 'apppbaEBT6QWth4I8';
-const AIRTABLE_TABLE = 'Table 1';
 
-const AIRTABLE_URL =
-  `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`;
-  async function getVersions() {
+async function getVersions() {
   try {
 
-    const res = await fetch(AIRTABLE_URL, {
-      headers: {
-        Authorization: `Bearer ${AIRTABLE_TOKEN}`
-      }
-    });
+    const res = await fetch('/.netlify/functions/getDrafts');
 
     const data = await res.json();
+
+    if (!data.records) {
+      console.error(data);
+      return [];
+    }
 
     return data.records.map(r => ({
       id: r.id,
