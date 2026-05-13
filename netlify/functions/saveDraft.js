@@ -53,23 +53,10 @@ return {
       statusCode: 500,
      body: JSON.stringify({
   fields: {
-    version_name: data.version_name,
-    created_at: new Date().toISOString(),
-
-    client_name: data.client_name,
-    project_name: data.project_name,
-    week_of: data.week_of,
-    issue_no: data.issue_no,
-    completion_date: data.completion_date,
-
-    notes: data.notes,
-    inspiration: data.inspiration,
-
-    wins_json: data.wins_json,
-    actions_json: data.actions_json,
-    phases_json: data.phases_json,
-    payments_json: data.payments_json
-  }
+  Name: data.version_name,
+  Date: new Date().toISOString(),
+  Data: JSON.stringify(data)
+}
 })
     };
 
