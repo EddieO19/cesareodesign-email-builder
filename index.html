@@ -271,10 +271,49 @@ var payments=[
 ];
 var generatedHTML='';
 var activeVersionId=null;
-var STORAGE_KEY='lcd_email_v4';
+const AIRTABLE_TOKEN = 'PASTE_YOUR_TOKEN';
+const AIRTABLE_BASE_ID = 'PASTE_YOUR_BASE_ID';
+const AIRTABLE_TABLE = 'Table 1';
 
-function getVersions(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[];}catch(e){return[];}}
-function saveVersions(v){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(v));}catch(e){}}
+const AIRTABLE_URL =
+  `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}`;
+  async function getVersions() {
+  try {
+
+    const res = await fetch(AIRTABLE_URL, {
+      headers: {
+        Authorization: `Bearer ${AIRTABLE_TOKEN}`
+      }
+    });
+
+    const data = await res.json();
+
+    return data.records.map(r => ({
+      id: r.id,
+      name: r.fields.version_name || 'Untitled',
+      date: r.fields.created_at || '',
+
+      data: {
+        name: r.fields.client_name || '',
+        project: r.fields.project_name || '',
+        week: r.fields.week_of || '',
+        issue: r.fields.issue_no || '',
+        completion: r.fields.completion_date || '',
+        notes: r.fields.notes || '',
+        inspo: r.fields.inspiration || '',
+
+        wins: JSON.parse(r.fields.wins_json || '[]'),
+        actions: JSON.parse(r.fields.actions_json || '[]'),
+        phases: JSON.parse(r.fields.phases_json || '[]'),
+        payments: JSON.parse(r.fields.payments_json || '[]')
+      }
+    }));
+
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}
 
 var statusCycle=['complete','awaiting','confirmed','inprogress'];
 var statusMeta={
@@ -573,36 +612,67 @@ function openSaveModal(){
 }
 function closeSaveModal(){document.getElementById('save-modal').classList.remove('open');}
 
-function saveVersion(){
-  var name=document.getElementById('save-name').value.trim();
-  if(!name) return;
-  var versions=getVersions();
-  var id=Date.now();
-  versions.unshift({id:id,name:name,
-    date:new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
-    data:{
-      name:document.getElementById('f-name').value,
-      project:document.getElementById('f-project').value,
-      week:document.getElementById('f-week').value,
-      issue:document.getElementById('f-issue').value,
-      completion:document.getElementById('f-completion').value,
-      notes:document.getElementById('f-notes').value,
-      inspo:document.getElementById('f-inspo').value,
-      wins:JSON.parse(JSON.stringify(wins)),
-      actions:JSON.parse(JSON.stringify(actions)),
-      phases:JSON.parse(JSON.stringify(phases)),
-      payments:JSON.parse(JSON.stringify(payments))
+async function saveVersion() {
+
+  var name = document.getElementById('save-name').value.trim();
+
+  if (!name) return;
+
+  const payload = {
+    fields: {
+
+      version_name: name,
+      created_at: new Date().toISOString(),
+
+      client_name: document.getElementById('f-name').value,
+      project_name: document.getElementById('f-project').value,
+      week_of: document.getElementById('f-week').value,
+      issue_no: document.getElementById('f-issue').value,
+      completion_date: document.getElementById('f-completion').value,
+
+      notes: document.getElementById('f-notes').value,
+      inspiration: document.getElementById('f-inspo').value,
+
+      wins_json: JSON.stringify(wins),
+      actions_json: JSON.stringify(actions),
+      phases_json: JSON.stringify(phases),
+      payments_json: JSON.stringify(payments)
     }
-  });
-  saveVersions(versions);
-  activeVersionId=id;
-  closeSaveModal();
-  renderVersionList();
-  showToast('Saved: '+name);
+  };
+
+  try {
+
+    await fetch(AIRTABLE_URL, {
+      method: 'POST',
+
+      headers: {
+        Authorization: `Bearer ${AIRTABLE_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify(payload)
+    });
+
+    closeSaveModal();
+
+    await renderVersionList();
+
+    showToast('Saved to Airtable');
+
+  } catch (e) {
+
+    console.error(e);
+
+    showToast('Save failed');
+  }
 }
 
-function loadVersion(id){
-  var v=getVersions().find(function(x){return x.id===id;});
+async function loadVersion(id){
+  var versions = await getVersions();
+
+var v = versions.find(function(x){
+  return x.id===id;
+});
   if(!v) return;
   var d=v.data;
   document.getElementById('f-name').value=d.name||'';
@@ -642,8 +712,8 @@ function deleteVersion(id){
   showToast('Version deleted');
 }
 
-function renderVersionList(){
-  var versions=getVersions();
+async function renderVersionList(){
+ var versions = await getVersions();
   var el=document.getElementById('version-list');
   if(!versions.length){el.innerHTML='<div class="empty-history">No saved versions yet.<br>Fill in the form and hit Save.</div>';return;}
   el.innerHTML=versions.map(function(v){
