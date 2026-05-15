@@ -273,6 +273,7 @@ var generatedHTML='';
 var activeVersionId=null;
 
 async function getVersions() {
+
   try {
 
     const res = await fetch('/.netlify/functions/getDrafts');
@@ -284,34 +285,26 @@ async function getVersions() {
       return [];
     }
 
-  return data.records.map(r => {
+    return data.records.map(r => {
 
-  const savedData = JSON.parse(r.fields.Data || '{}');
+      const savedData = JSON.parse(r.fields.Data || '{}');
 
-  return {
-    id: r.id,
-    name: r.fields.Name || 'Untitled',
-    date: r.fields.Date || '',
+      return {
+        id: r.id,
 
-    data: {
-      name: savedData.client_name || '',
-      project: savedData.project_name || '',
-      week: savedData.week_of || '',
-      issue: savedData.issue_no || '',
-      completion: savedData.completion_date || '',
-      notes: savedData.notes || '',
-      inspo: savedData.inspiration || '',
+        name: r.fields.Name || 'Untitled',
 
-      wins: JSON.parse(savedData.wins_json || '[]'),
-      actions: JSON.parse(savedData.actions_json || '[]'),
-      phases: JSON.parse(savedData.phases_json || '[]'),
-      payments: JSON.parse(savedData.payments_json || '[]')
-    }
-  };
-});
+        date: r.fields.Date || '',
+
+        data: savedData
+      };
+
+    });
 
   } catch (e) {
+
     console.error(e);
+
     return [];
   }
 }
@@ -615,51 +608,60 @@ function closeSaveModal(){document.getElementById('save-modal').classList.remove
 
 async function saveVersion() {
 
-  var name = document.getElementById('save-name').value.trim();
+  var versionName =
+    document.getElementById('save-name').value.trim();
 
-  if (!name) return;
+  if (!versionName) return;
 
-  const payload = {
-    fields: {
+  const draftData = {
 
-      version_name: name,
-      created_at: new Date().toISOString(),
+    name:
+      document.getElementById('f-name').value,
 
-      client_name: document.getElementById('f-name').value,
-      project_name: document.getElementById('f-project').value,
-      week_of: document.getElementById('f-week').value,
-      issue_no: document.getElementById('f-issue').value,
-      completion_date: document.getElementById('f-completion').value,
+    project:
+      document.getElementById('f-project').value,
 
-      notes: document.getElementById('f-notes').value,
-      inspiration: document.getElementById('f-inspo').value,
+    week:
+      document.getElementById('f-week').value,
 
-      wins_json: JSON.stringify(wins),
-      actions_json: JSON.stringify(actions),
-      phases_json: JSON.stringify(phases),
-      payments_json: JSON.stringify(payments)
-    }
+    issue:
+      document.getElementById('f-issue').value,
+
+    completion:
+      document.getElementById('f-completion').value,
+
+    notes:
+      document.getElementById('f-notes').value,
+
+    inspo:
+      document.getElementById('f-inspo').value,
+
+    wins,
+    actions,
+    phases,
+    payments
   };
 
   try {
 
- const response = await fetch('/.netlify/functions/saveDraft', {
-  method: 'POST',
+    const response =
+      await fetch('/.netlify/functions/saveDraft', {
 
-  headers: {
-    'Content-Type': 'application/json'
-  },
+        method: 'POST',
 
-  body: JSON.stringify(payload.fields)
-});
+        headers: {
+          'Content-Type': 'application/json'
+        },
 
-const result = await response.json();
+        body: JSON.stringify({
+          versionName,
+          draftData
+        })
+      });
 
-if (!response.ok) {
-  console.error(result);
-  showToast('Save failed');
-  return;
-}
+    const result = await response.json();
+
+    console.log(result);
 
     closeSaveModal();
 
