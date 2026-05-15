@@ -723,19 +723,50 @@ function deleteVersion(id){
 }
 
 async function renderVersionList(){
- var versions = await getVersions();
-  var el=document.getElementById('version-list');
-  if(!versions.length){el.innerHTML='<div class="empty-history">No saved versions yet.<br>Fill in the form and hit Save.</div>';return;}
-  el.innerHTML=versions.map(function(v){
-    return '<div class="version-item'+(activeVersionId===v.id?' active-v':'')+'">'+
-      '<div class="version-name">'+esc(v.name)+'</div>'+
-      '<div class="version-date">'+esc(v.date)+'</div>'+
-      '<div class="version-actions">'+
-        '<button class="version-btn" onclick="loadVersion('+v.id+')">Load</button>'+
-        '<button class="version-btn" onclick="duplicateVersion('+v.id+')">Duplicate</button>'+
-        '<button class="version-btn danger" onclick="deleteVersion('+v.id+')">Delete</button>'+
-      '</div>'+
-    '</div>';
+
+  var versions = await getVersions();
+
+  var el = document.getElementById('version-list');
+
+  if(!versions.length){
+
+    el.innerHTML =
+      '<div class="empty-history">' +
+      'No saved versions yet.<br>' +
+      'Fill in the form and hit Save.' +
+      '</div>';
+
+    return;
+  }
+
+  el.innerHTML = versions.map(function(v){
+
+    return (
+      '<div class="version-item' +
+      (activeVersionId===v.id ? ' active-v' : '') +
+      '">' +
+
+        '<div class="version-name">' +
+        esc(v.name) +
+        '</div>' +
+
+        '<div class="version-date">' +
+        esc(v.date) +
+        '</div>' +
+
+        '<div class="version-actions">' +
+
+          '<button class="version-btn" onclick="loadVersion(\'' + v.id + '\')">Load</button>' +
+
+          '<button class="version-btn" onclick="duplicateVersion(\'' + v.id + '\')">Duplicate</button>' +
+
+          '<button class="version-btn danger" onclick="deleteVersion(\'' + v.id + '\')">Delete</button>' +
+
+        '</div>' +
+
+      '</div>'
+    );
+
   }).join('');
 }
 
