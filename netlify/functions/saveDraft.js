@@ -25,7 +25,7 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           fields: {
             Name: data.name,
-            Notes: JSON.stringify(data)
+            Data: JSON.stringify(data)
           }
         })
       }
