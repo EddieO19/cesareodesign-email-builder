@@ -7,7 +7,13 @@ exports.handler = async function(event) {
   try {
 
     const data = JSON.parse(event.body);
-
+    console.log("DATA RECEIVED:", data);
+    console.log("FIELDS BEING SENT:", {
+  Name: data.version_name,
+  Date: new Date().toISOString(),
+  Data: JSON.stringify(data)
+});
+    
     const response = await fetch(
       `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`,
       {
